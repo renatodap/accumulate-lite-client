@@ -83,15 +83,27 @@ export default function Home() {
         await new Promise(resolve => setTimeout(resolve, 5000))
         setQueryResult(mockResult)
       } else {
-        // Online mode - call API
+        // Online mode - call Crystal API first, then fallback to regular API
         setTimeout(async () => {
-          const response = await fetch(`/api/query`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ account: accountUrl })
-          })
-          const data = await response.json()
-          setQueryResult(data)
+          try {
+            // Try Crystal API endpoint first
+            const response = await fetch(`/api/crystal`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ account: accountUrl })
+            })
+            const data = await response.json()
+            setQueryResult(data)
+          } catch {
+            // Fallback to regular API
+            const response = await fetch(`/api/query`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ account: accountUrl })
+            })
+            const data = await response.json()
+            setQueryResult(data)
+          }
         }, 5000) // Show animation for 5 seconds
       }
     } catch (error) {
